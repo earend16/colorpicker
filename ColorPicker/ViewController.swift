@@ -87,7 +87,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         rectangleView1.backgroundColor = rectangle1Color
         rectangleView1.layer.cornerRadius = 20.0
         
-        //view.addSubview(rectangleView1)
+        view.addSubview(rectangleView1)
         setupSubmitButton()
     }
     
@@ -101,11 +101,42 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     }
 
     @objc private func didTapSubmitColor() {
+        // Scale down animation to give feedback
+        UIView.animate(withDuration: 0.1, animations: {
+            self.submitButton.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+            self.submitButton.backgroundColor = .darkGray // Change color to indicate press
+        }) { _ in
+            // Scale back to normal
+            UIView.animate(withDuration: 0.1) {
+                self.submitButton.transform = .identity
+                self.submitButton.backgroundColor = .systemBlue // Revert color
+            }
+        }
+        
         if let color = rectangleView.backgroundColor {
-            let rgb = color.rgb()
-            let rgbValue = RGBValue(red: Int(rgb.red), green: Int(rgb.green), blue: Int(rgb.blue))
-            let key = "selectedColor"  // TODO: Key should be the target RGB value...
+            // Convert the selected color to P3 color space
+            let p3Color = colorConversionToP3(color: color)
+            
+            // Extract P3 RGB components
+            let rgbValues = p3Color.rgb()
+            
+            // Create an RGBValue struct with P3 RGB components
+            let rgbValue = RGBValue(red: Int(rgbValues.red), green: Int(rgbValues.green), blue: Int(rgbValues.blue))
+            
+            // TODO: Key should be the target RGB value...
+            let key = "selectedColorP3"
+            
+            // Save the P3 RGB value
             RGBStorage.shared.saveRGBValue(for: key, rgbValue: rgbValue)
+            
+            print("Saved P3 RGB Value: R: \(rgbValue.red), G: \(rgbValue.green), B: \(rgbValue.blue)")
+            
+            // Indicate success to the user
+            submitButton.setTitle("Color Saved!", for: .normal)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // 2-second delay
+                self.submitButton.setTitle("Submit Color", for: .normal)
+            }
         }
     }
     
@@ -120,13 +151,13 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     func colorConversionToP3(color: UIColor) -> UIColor{
         let p3Color: UIColor = {
             guard let colorSpace = CGColorSpace(name: CGColorSpace.displayP3),
-                  let cgColor = color.cgColor.converted(
-                    to: colorSpace,
-                    intent: .defaultIntent,
-                    options: nil
-                  ),
-                  let rgba = cgColor.components,
-                  rgba.count == 4
+                let cgColor = color.cgColor.converted(
+                to: colorSpace,
+                intent: .defaultIntent,
+                options: nil
+                ),
+                let rgba = cgColor.components,
+                rgba.count == 4
             else {
                 return color
             }
@@ -145,28 +176,27 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
        
         // Print the values of P3 in console
         print("\(p3Color.rgb().red),\(p3Color.rgb().green), \(p3Color.rgb().blue) ")
-        
     }
     
     func printRGBValues(color: UIColor) {
-           let rgbValues = color.rgb()
-          //print("RGB Values: R: \(rgbValues.red), G: \(rgbValues.green), B: \(rgbValues.blue)")
-       }
-    
-    @IBAction func colorPickerViewControllerDidFinish( _ viewController: UIColorPickerViewController) {
-        let color = viewController.selectedColor
+        _ = color.rgb()
+        //print("RGB Values: R: \(rgbValues.red), G: \(rgbValues.green), B: \(rgbValues.blue)")
     }
     
-    func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController){
+    @IBAction func colorPickerViewControllerDidFinish( _ viewController: UIColorPickerViewController) {
+        _ = viewController.selectedColor
+    }
+    
+    func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
         let color = viewController.selectedColor
         rectangleView.backgroundColor = color
         
-        let rgbValues = color.rgb()
-        
-        //print("RGB Values: R: \(rgbValues.red), G: \(rgbValues.green), B: \(rgbValues.blue)")
+        // Update the label with the new color's RGB values
         updateColorValuesLabel(color: rectangleView.backgroundColor!)
-    }
         
+        // Reset the submit button's title to prompt for submission
+        submitButton.setTitle("Submit Color", for: .normal)
+    }
 }
 
 extension UIColor {
