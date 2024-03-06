@@ -101,42 +101,38 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     }
 
     @objc private func didTapSubmitColor() {
-        // Scale down animation to give feedback
-        UIView.animate(withDuration: 0.1, animations: {
-            self.submitButton.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
-            self.submitButton.backgroundColor = .darkGray // Change color to indicate press
-        }) { _ in
-            // Scale back to normal
-            UIView.animate(withDuration: 0.1) {
-                self.submitButton.transform = .identity
-                self.submitButton.backgroundColor = .systemBlue // Revert color
-            }
-        }
+        // Generate a timestamp key
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // Year, Month, Day, Hour, Minute, Second, Millisecond
+        let timestampKey = dateFormatter.string(from: Date())
         
+        // Proceed with the existing logic to convert the selected color and save it
         if let color = rectangleView.backgroundColor {
-            // Convert the selected color to P3 color space
             let p3Color = colorConversionToP3(color: color)
-            
-            // Extract P3 RGB components
             let rgbValues = p3Color.rgb()
-            
-            // Create an RGBValue struct with P3 RGB components
             let rgbValue = RGBValue(red: Int(rgbValues.red), green: Int(rgbValues.green), blue: Int(rgbValues.blue))
             
-            // TODO: Key should be the target RGB value...
-            let key = "selectedColorP3"
+            // Save the P3 RGB value with the timestamp key
+            RGBStorage.shared.saveRGBValue(for: timestampKey, rgbValue: rgbValue)
             
-            // Save the P3 RGB value
-            RGBStorage.shared.saveRGBValue(for: key, rgbValue: rgbValue)
-            
-            print("Saved P3 RGB Value: R: \(rgbValue.red), G: \(rgbValue.green), B: \(rgbValue.blue)")
-            
-            // Indicate success to the user
-            submitButton.setTitle("Color Saved!", for: .normal)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { // 2-second delay
-                self.submitButton.setTitle("Submit Color", for: .normal)
+            // Provide user feedback
+            UIView.animate(withDuration: 0.1, animations: {
+                self.submitButton.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+                self.submitButton.backgroundColor = .darkGray
+            }) { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.submitButton.transform = .identity
+                    self.submitButton.backgroundColor = .systemBlue
+                    self.submitButton.setTitle("Color Saved!", for: .normal)
+                }
+                
+                // Revert the button's title after a delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.submitButton.setTitle("Submit Color", for: .normal)
+                }
             }
+            
+            print("Saved P3 RGB Value: R: \(rgbValue.red), G: \(rgbValue.green), B: \(rgbValue.blue) with key \(timestampKey)")
         }
     }
     
