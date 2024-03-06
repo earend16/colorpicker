@@ -15,6 +15,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     private var colorValuesLabel: UILabel!
     private var rectangleView1: UIView!
     private var whiteBoxView: UIView!
+    private var submitButton: UIButton!
    
     var wantsSoftwareDimming: Bool = false
     
@@ -86,7 +87,26 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         rectangleView1.backgroundColor = rectangle1Color
         rectangleView1.layer.cornerRadius = 20.0
         
-       //view.addSubview(rectangleView1)
+        //view.addSubview(rectangleView1)
+        setupSubmitButton()
+    }
+    
+    private func setupSubmitButton() {
+        submitButton = UIButton(frame: CGRect(x: 20, y: view.bounds.height - 100, width: view.bounds.width - 40, height: 50))
+        submitButton.backgroundColor = .systemBlue
+        submitButton.setTitle("Submit Color", for: .normal)
+        submitButton.layer.cornerRadius = 10
+        submitButton.addTarget(self, action: #selector(didTapSubmitColor), for: .touchUpInside)
+        view.addSubview(submitButton)
+    }
+
+    @objc private func didTapSubmitColor() {
+        if let color = rectangleView.backgroundColor {
+            let rgb = color.rgb()
+            let rgbValue = RGBValue(red: Int(rgb.red), green: Int(rgb.green), blue: Int(rgb.blue))
+            let key = "selectedColor"  // TODO: Key should be the target RGB value...
+            RGBStorage.shared.saveRGBValue(for: key, rgbValue: rgbValue)
+        }
     }
     
     @objc private func didTapSelectColor(){
