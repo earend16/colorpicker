@@ -31,7 +31,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         let rectangleSize = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 0.9)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.35)))
         
         let yOffset = (view.bounds.height - rectangleSize.height) / 7
-        let rectangleFrame = CGRect(x: (view.bounds.width - rectangleSize.width) / 2.0, y: yOffset, width: rectangleSize.width, height: rectangleSize.height)
+        let rectangleFrame = CGRect(x: (view.bounds.width - rectangleSize.width) / 2, y: yOffset - 20, width: rectangleSize.width , height: rectangleSize.height - 30)
         rectangleView = UIView(frame: rectangleFrame)
         rectangleView.backgroundColor = rectangleColor
         rectangleView.layer.cornerRadius = 20.0
@@ -61,7 +61,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         let whiteBox = UIColor.white
         let whiteBoxSize = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 0.7)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.06)))
         
-        let yOffsetWhite = (view.bounds.height - whiteBoxSize.height) / 2.1
+        let yOffsetWhite = (view.bounds.height - whiteBoxSize.height) / 2.35
         let whiteBoxFrame = CGRect(x: (view.bounds.width - whiteBoxSize.width) / 2, y: yOffsetWhite, width: whiteBoxSize.width, height: whiteBoxSize.height)
         whiteBoxView = UIView(frame: whiteBoxFrame)
         whiteBoxView.backgroundColor = whiteBox
@@ -73,13 +73,13 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         colorValuesLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 30))
         colorValuesLabel.textAlignment = .center
         colorValuesLabel.textColor = UIColor.black
-        colorValuesLabel.center = CGPoint(x: view.bounds.width / 2.0, y: view.bounds.height / 2.0 - 23)
+        colorValuesLabel.center = CGPoint(x: view.bounds.width / 2.0, y: view.bounds.height / 2.0 - 60)
         updateColorValuesLabel(color: rectangleView.backgroundColor!)
         view.addSubview(colorValuesLabel)
             
         // The lowest rectangle
         let rectangle1Color = UIColor.systemGray5
-        let rectangle1Size = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 1)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.06)))
+        let rectangle1Size = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 1)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.1)))
         
         let yOffset1 = (view.bounds.height - rectangle1Size.height) / 1
         let rectangle1Frame = CGRect(x: (view.bounds.width - rectangle1Size.width) / 2.0, y: yOffset1, width: rectangle1Size.width, height: rectangle1Size.height)
@@ -92,7 +92,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     }
     
     private func setupSubmitButton() {
-        submitButton = UIButton(frame: CGRect(x: 20, y: view.bounds.height - 100, width: view.bounds.width - 40, height: 50))
+        submitButton = UIButton(frame: CGRect(x: 20, y: view.bounds.height - 90, width: view.bounds.width - 40, height: 50))
         submitButton.backgroundColor = .systemBlue
         submitButton.setTitle("Submit Color", for: .normal)
         submitButton.layer.cornerRadius = 10
