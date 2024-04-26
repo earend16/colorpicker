@@ -112,7 +112,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         if let color = rectangleView.backgroundColor {
             let p3Color = colorConversionToP3(color: color)
             let rgbValues = p3Color.rgb()
-            let rgbValue = RGBValue(red: Int(rgbValues.red), green: Int(rgbValues.green), blue: Int(rgbValues.blue))
+            let rgbValue = RGBValue(red: rgbValues.red, green: rgbValues.green, blue: rgbValues.blue)
             
             // Save the P3 RGB value with the timestamp key
             RGBStorage.shared.saveRGBValue(for: timestampKey, rgbValue: rgbValue)

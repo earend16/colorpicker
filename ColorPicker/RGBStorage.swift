@@ -2,9 +2,9 @@ import Foundation
  
 // RGBValue struct definition
 struct RGBValue: Codable {
-    let red: Int
-    let green: Int
-    let blue: Int
+    let red: Double
+    let green: Double
+    let blue: Double
 }
  
 // Custom encoder for RGBValue to String
@@ -16,7 +16,7 @@ extension RGBValue {
     static func decodeFromString(_ string: String) -> RGBValue? {
         let components = string.split(separator: ",").map(String.init).compactMap(Int.init)
         if components.count == 3 {
-            return RGBValue(red: components[0], green: components[1], blue: components[2])
+            return RGBValue(red: Double(components[0]), green: Double(components[1]), blue: Double(components[2]))
         }
         return nil
     }
