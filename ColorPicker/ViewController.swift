@@ -1,12 +1,6 @@
-//
-//  ViewController.swift
-//  ColorPicker
-//
-//  Created by Emilie Maria Nybo Arendttorp on 11/12/2023.
-//
-
 import UIKit
 import SwiftUI
+import AVFoundation
 
 class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     
@@ -16,6 +10,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     private var rectangleView1: UIView!
     private var whiteBoxView: UIView!
     private var submitButton: UIButton!
+    private var audioPlayer: AVAudioPlayer?
    
     var wantsSoftwareDimming: Bool = false
     
@@ -89,6 +84,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         
         view.addSubview(rectangleView1)
         setupSubmitButton()
+        setupAudioPlayer()
     }
     
     private func setupSubmitButton() {
@@ -99,8 +95,22 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         submitButton.addTarget(self, action: #selector(didTapSubmitColor), for: .touchUpInside)
         view.addSubview(submitButton)
     }
+    
+    private func setupAudioPlayer() {
+        if let soundURL = Bundle.main.url(forResource: "submit_sound", withExtension: "wav") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+                audioPlayer?.prepareToPlay()
+            } catch {
+                print("Error loading sound file: \(error)")
+            }
+        }
+    }
 
     @objc private func didTapSubmitColor() {
+        // Play the sound
+        audioPlayer?.play()
+        
         // Generate a timestamp key
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // Year, Month, Day, Hour, Minute, Second, Millisecond
