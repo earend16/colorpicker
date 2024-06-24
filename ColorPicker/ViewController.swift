@@ -85,6 +85,9 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         view.addSubview(rectangleView1)
         setupSubmitButton()
         setupAudioPlayer()
+        
+        // Run the test for RGBStorage
+        RGBStorage.shared.testRGBConversion()
     }
     
     private func setupSubmitButton() {
