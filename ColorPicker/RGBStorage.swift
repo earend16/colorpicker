@@ -25,7 +25,7 @@ extension RGBValue {
 // RGBStorage class definition
 class RGBStorage {
     static let shared = RGBStorage()
-    private let fileName = "rgbValues.txt"  // File extension changed to .txt to reflect non-JSON format
+    private let fileName = "rgbValues.txt"
     private var rgbValues: [(key: String, value: RGBValue)] = []  // Use an array of tuples to maintain order
 
     init() {
@@ -45,8 +45,8 @@ class RGBStorage {
                 let data = try String(contentsOf: fileURL, encoding: .utf8)
                 let lines = data.split(separator: "\n")
                 rgbValues = lines.compactMap { line in
-                    let parts = line.split(separator: ":")
-                    guard parts.count == 2, let value = RGBValue.decodeFromString(String(parts[1])) else {
+                    let parts = line.split(separator: ",")
+                    guard parts.count == 4, let value = RGBValue.decodeFromString("\(parts[1]),\(parts[2]),\(parts[3])") else {
                         return nil
                     }
                     return (key: String(parts[0]), value: value)
@@ -60,7 +60,7 @@ class RGBStorage {
     func saveRGBValue(rgbValue: RGBValue) {
         // Generate a timestamp key
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // Year, Month, Day, Hour, Minute, Second, Millisecond
+        dateFormatter.dateFormat = "yyyy-MM-dd-HH-mm-ss-SSS"
         let timestampKey = dateFormatter.string(from: Date())
         
         rgbValues.append((key: timestampKey, value: rgbValue))
@@ -69,7 +69,7 @@ class RGBStorage {
 
     private func saveRGBValues() {
         let fileURL = getDocumentsDirectory().appendingPathComponent(fileName)
-        let data = rgbValues.map { "\($0.key):\($0.value.encodeToString())" }.joined(separator: "\n")
+        let data = rgbValues.map { "\($0.key),\($0.value.encodeToString())" }.joined(separator: "\n")
         do {
             try data.write(to: fileURL, atomically: true, encoding: .utf8)
         } catch {
