@@ -1,12 +1,6 @@
-//
-//  ViewController.swift
-//  ColorPicker
-//
-//  Created by Emilie Maria Nybo Arendttorp on 11/12/2023.
-//
-
 import UIKit
 import SwiftUI
+import AVFoundation
 
 class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     
@@ -16,6 +10,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     private var rectangleView1: UIView!
     private var whiteBoxView: UIView!
     private var submitButton: UIButton!
+    private var audioPlayer: AVAudioPlayer?
    
     var wantsSoftwareDimming: Bool = false
     
@@ -77,7 +72,6 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         updateColorValuesLabel(color: rectangleView.backgroundColor!)
         view.addSubview(colorValuesLabel)
             
-        
         // The lowest rectangle
         let rectangle1Color = UIColor.systemGray5
         let rectangle1Size = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 1)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.1)))
@@ -90,6 +84,10 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         
         view.addSubview(rectangleView1)
         setupSubmitButton()
+        setupAudioPlayer()
+        
+        // Run the test for RGBStorage
+        RGBStorage.shared.testRGBConversion()
     }
     
     private func setupSubmitButton() {
@@ -100,13 +98,21 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         submitButton.addTarget(self, action: #selector(didTapSubmitColor), for: .touchUpInside)
         view.addSubview(submitButton)
     }
-     
+    
+    private func setupAudioPlayer() {
+        if let soundURL = Bundle.main.url(forResource: "submit_sound", withExtension: "wav") {
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: soundURL)
+                audioPlayer?.prepareToPlay()
+            } catch {
+                print("Error loading sound file: \(error)")
+            }
+        }
+    }
 
     @objc private func didTapSubmitColor() {
-        // Generate a timestamp key
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd-HH-mm-ssSSS" // Year, Month, Day, Hour, Minute, Second, Millisecond
-        let timestampKey = dateFormatter.string(from: Date())
+        // Play the sound
+        audioPlayer?.play()
         
         // Proceed with the existing logic to convert the selected color and save it
         if let color = rectangleView.backgroundColor {
@@ -114,24 +120,8 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
             let rgbValues = p3Color.rgb()
             let rgbValue = RGBValue(red: rgbValues.red, green: rgbValues.green, blue: rgbValues.blue)
             
-            // Save the P3 RGB value with the timestamp key
-            RGBStorage.shared.saveRGBValue(for: timestampKey, rgbValue: rgbValue)
-            
-            
-            //chatgbt - from here
-            // Code to log inputs From chatgbt
-            let userInput = "User input example"
-            let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("logofcolors.txt")
-
-            do {
-                // Write to the file
-                try userInput.write(to: filePath, atomically: true, encoding: .utf8)
-            } catch {
-                // Handle errors
-                print("Error writing to file: \(error)")
-            }
-            
-            //chatgbt - to here
+            // Save the P3 RGB value
+            RGBStorage.shared.saveRGBValue(rgbValue: rgbValue)
             
             // Provide user feedback
             UIView.animate(withDuration: 0.1, animations: {
@@ -143,7 +133,6 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
                     self.submitButton.backgroundColor = .systemBlue
                     self.submitButton.setTitle("Color Saved!", for: .normal)
                 }
-              
                 
                 // Revert the button's title after a delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -151,11 +140,9 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
                 }
             }
             
-            print("Saved P3 RGB Value: R: \(rgbValue.red), G: \(rgbValue.green), B: \(rgbValue.blue) with key \(timestampKey)")
+            print("Saved P3 RGB Value: R: \(rgbValue.red), G: \(rgbValue.green), B: \(rgbValue.blue)")
         }
-             
     }
-             
     
     @objc private func didTapSelectColor(){
         let colorPickerVC = UIColorPickerViewController()
@@ -185,7 +172,6 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     }
     
     func updateColorValuesLabel(color: UIColor) {
-        
         let p3Color = colorConversionToP3(color: color);
         
         colorValuesLabel.text = String(format: "R: %.0f  G: %.0f  B: %.0f", p3Color.rgb().red, p3Color.rgb().green, p3Color.rgb().blue)
@@ -200,7 +186,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         //print("RGB Values: R: \(rgbValues.red), G: \(rgbValues.green), B: \(rgbValues.blue)")
     }
     
-    @IBAction func colorPickerViewControllerDidFinish( _ viewController: UIColorPickerViewController) {
+    @IBAction func colorPickerViewControllerDidFinish(_ viewController: UIColorPickerViewController) {
         _ = viewController.selectedColor
     }
     
@@ -211,7 +197,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         // Update the label with the new color's RGB values
         updateColorValuesLabel(color: rectangleView.backgroundColor!)
         
-        //Reset the submit button's title to prompt for submission
+        // Reset the submit button's title to prompt for submission
         submitButton.setTitle("Submit Color", for: .normal)
     }
 }
