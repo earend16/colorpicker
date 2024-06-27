@@ -16,26 +16,27 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
         view.backgroundColor = UIColor.systemGray5
         UIScreen.main.brightness = 1.0
         
-        // The top rectangle beeing edited by the color picker
+        setupSubmitButton()
+
+        // Adjust the yOffset values to account for the submit button at the top
+        let submitButtonHeight: CGFloat = 50 + 20 // Button height plus some padding
+
+        // The top rectangle being edited by the color picker
         let rectangleColor = UIColor.white
         let rectangleSize = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 0.9)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.35)))
-        
-        let yOffset = (view.bounds.height - rectangleSize.height) / 7
+        let yOffset = (view.bounds.height - rectangleSize.height) / 7 + submitButtonHeight
         let rectangleFrame = CGRect(x: (view.bounds.width - rectangleSize.width) / 2, y: yOffset - 20, width: rectangleSize.width , height: rectangleSize.height - 30)
         rectangleView = UIView(frame: rectangleFrame)
         rectangleView.backgroundColor = rectangleColor
         rectangleView.layer.cornerRadius = 20.0
-        
         view.addSubview(rectangleView)
         
         // Function that updates the color
         func changeRectangleColor() {
-            rectangleView.backgroundColor = UIColor.red // Change the color to your desired color
+            rectangleView.backgroundColor = UIColor.red
         }
  
         // The colorPicker
@@ -44,46 +45,42 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
         colorPickerVC.supportsAlpha = false
         addChild(colorPickerVC)
         view.addSubview(colorPickerVC.view)
-    
-        // Adjust the vertical spacing of the color picker
-        colorPickerVC.view.frame.origin.y = rectangleFrame.maxY + 20
-        
-        // Add rounded corners to the color picker view
-        colorPickerVC.view.layer.cornerRadius = 10.0
+        colorPickerVC.view.frame.origin.y = rectangleFrame.maxY + 20 // Adjust the vertical spacing of the color picker
+        colorPickerVC.view.layer.cornerRadius = 10.0 // Add rounded corners to the color picker view
         colorPickerVC.didMove(toParent: self)
         
         // Create a white box (UIView)
         let whiteBox = UIColor.white
         let whiteBoxSize = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 0.7)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.06)))
-        
-        let yOffsetWhite = (view.bounds.height - whiteBoxSize.height) / 2.35
+        let yOffsetWhite = (view.bounds.height - whiteBoxSize.height) / 2.35 + submitButtonHeight
         let whiteBoxFrame = CGRect(x: (view.bounds.width - whiteBoxSize.width) / 2, y: yOffsetWhite, width: whiteBoxSize.width, height: whiteBoxSize.height)
         whiteBoxView = UIView(frame: whiteBoxFrame)
         whiteBoxView.backgroundColor = whiteBox
         whiteBoxView.layer.cornerRadius = 20.0
-        
         view.addSubview(whiteBoxView)
         
-        // Edit the placement of rgb values line 39 is the position adjustement
         colorValuesLabel = UILabel(frame: CGRect(x: 0, y: 0, width: 200, height: 30))
         colorValuesLabel.textAlignment = .center
         colorValuesLabel.textColor = UIColor.black
-        colorValuesLabel.center = CGPoint(x: view.bounds.width / 2.0, y: view.bounds.height / 2.0 - 60)
+        colorValuesLabel.center = CGPoint(x: view.bounds.width / 2.0, y: view.bounds.height / 2.0 - 60 + submitButtonHeight)
         updateColorValuesLabel(color: rectangleView.backgroundColor!)
         view.addSubview(colorValuesLabel)
             
-        // The lowest rectangle
-        let rectangle1Color = UIColor.systemGray5
-        let rectangle1Size = CGSize(width: CGFloat(Int(UIScreen.main.bounds.width * 1)), height: CGFloat(Int(UIScreen.main.bounds.height * 0.1)))
-        
-        let yOffset1 = (view.bounds.height - rectangle1Size.height) / 1
-        let rectangle1Frame = CGRect(x: (view.bounds.width - rectangle1Size.width) / 2.0, y: yOffset1, width: rectangle1Size.width, height: rectangle1Size.height)
-        rectangleView1 = UIView(frame: rectangle1Frame)
-        rectangleView1.backgroundColor = rectangle1Color
+        // The lowest rectangle that hides parts of the color picker that we're not interested in
+        rectangleView1 = UIView()
+        rectangleView1.backgroundColor = UIColor.systemGray5
         rectangleView1.layer.cornerRadius = 20.0
-        
+        rectangleView1.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(rectangleView1)
-        setupSubmitButton()
+        
+        // Constraints to make the layout transferable to both 15 Pro and 15 Pro Max
+        NSLayoutConstraint.activate([
+            rectangleView1.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: 60), // 60 points from the bottom
+            rectangleView1.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            rectangleView1.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            rectangleView1.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.1)
+        ])
+        
         setupAudioPlayer()
         
         // Run the test for RGBStorage
@@ -91,8 +88,8 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
     }
     
     private func setupSubmitButton() {
-        submitButton = UIButton(frame: CGRect(x: 20, y: view.bounds.height - 90, width: view.bounds.width - 40, height: 50))
-        submitButton.backgroundColor = .systemBlue
+        submitButton = UIButton(frame: CGRect(x: 20, y: 65, width: view.bounds.width - 40, height: 50))
+        submitButton.backgroundColor = .black
         submitButton.setTitle("Submit Color", for: .normal)
         submitButton.layer.cornerRadius = 10
         submitButton.addTarget(self, action: #selector(didTapSubmitColor), for: .touchUpInside)
@@ -130,7 +127,7 @@ class ViewController: UIViewController, UIColorPickerViewControllerDelegate {
             }) { _ in
                 UIView.animate(withDuration: 0.1) {
                     self.submitButton.transform = .identity
-                    self.submitButton.backgroundColor = .systemBlue
+                    self.submitButton.backgroundColor = .black  // Maintain black color after animation
                     self.submitButton.setTitle("Color Saved!", for: .normal)
                 }
                 
